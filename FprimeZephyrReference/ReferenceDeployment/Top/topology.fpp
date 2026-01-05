@@ -341,15 +341,15 @@ module ReferenceDeployment {
       detumbleManager.magneticFieldSamplingPeriodGet -> imuManager.magneticFieldSamplingPeriodGet
 
       detumbleManager.xPlusStart -> drv2605Face0Manager.start
-      detumbleManager.xMinusStart -> drv2605Face1Manager.start
-      detumbleManager.yPlusStart -> drv2605Face2Manager.start
-      detumbleManager.yMinusStart -> drv2605Face3Manager.start
+      detumbleManager.xMinusStart -> drv2605Face3Manager.start
+      detumbleManager.yPlusStart -> drv2605Face1Manager.start
+      detumbleManager.yMinusStart -> drv2605Face2Manager.start
       detumbleManager.zMinusStart -> drv2605Face5Manager.start
 
       detumbleManager.xPlusStop -> drv2605Face0Manager.stop
-      detumbleManager.xMinusStop -> drv2605Face1Manager.stop
-      detumbleManager.yPlusStop -> drv2605Face2Manager.stop
-      detumbleManager.yMinusStop -> drv2605Face3Manager.stop
+      detumbleManager.xMinusStop -> drv2605Face3Manager.stop
+      detumbleManager.yPlusStop -> drv2605Face1Manager.stop
+      detumbleManager.yMinusStop -> drv2605Face2Manager.stop
       detumbleManager.zMinusStop -> drv2605Face5Manager.stop
 
       detumbleManager.getSystemMode -> modeManager.getMode
@@ -457,23 +457,17 @@ module ReferenceDeployment {
       # face4 = index 0, face0 = index 1, face1 = index 2, face2 = index 3
       # face3 = index 4, face5 = index 5, payloadPower = index 6, payloadBattery = index 7
       # TODO(ALLTEAMS): Configure the faces you want to automatically turn on
-      # modeManager.loadSwitchTurnOn[0] -> face4LoadSwitch.turnOn
-      # modeManager.loadSwitchTurnOn[1] -> face0LoadSwitch.turnOn
-      # modeManager.loadSwitchTurnOn[2] -> face1LoadSwitch.turnOn
-      # modeManager.loadSwitchTurnOn[3] -> face2LoadSwitch.turnOn
-      # modeManager.loadSwitchTurnOn[4] -> face3LoadSwitch.turnOn
-      # modeManager.loadSwitchTurnOn[5] -> face5LoadSwitch.turnOn
-      # modeManager.loadSwitchTurnOn[6] -> payloadPowerLoadSwitch.turnOn
-      # modeManager.loadSwitchTurnOn[7] -> payloadBatteryLoadSwitch.turnOn
+      modeManager.loadSwitchTurnOn[0] -> face0LoadSwitch.turnOn
+      modeManager.loadSwitchTurnOn[1] -> face1LoadSwitch.turnOn
+      modeManager.loadSwitchTurnOn[2] -> face2LoadSwitch.turnOn
+      modeManager.loadSwitchTurnOn[3] -> face3LoadSwitch.turnOn
+      modeManager.loadSwitchTurnOn[4] -> face5LoadSwitch.turnOn
 
-      modeManager.loadSwitchTurnOff[0] -> face4LoadSwitch.turnOff
-      modeManager.loadSwitchTurnOff[1] -> face0LoadSwitch.turnOff
-      modeManager.loadSwitchTurnOff[2] -> face1LoadSwitch.turnOff
-      modeManager.loadSwitchTurnOff[3] -> face2LoadSwitch.turnOff
-      modeManager.loadSwitchTurnOff[4] -> face3LoadSwitch.turnOff
-      modeManager.loadSwitchTurnOff[5] -> face5LoadSwitch.turnOff
-      modeManager.loadSwitchTurnOff[6] -> payloadPowerLoadSwitch.turnOff
-      modeManager.loadSwitchTurnOff[7] -> payloadBatteryLoadSwitch.turnOff
+      modeManager.loadSwitchTurnOff[0] -> face0LoadSwitch.turnOff
+      modeManager.loadSwitchTurnOff[1] -> face1LoadSwitch.turnOff
+      modeManager.loadSwitchTurnOff[2] -> face2LoadSwitch.turnOff
+      modeManager.loadSwitchTurnOff[3] -> face3LoadSwitch.turnOff
+      modeManager.loadSwitchTurnOff[4] -> face5LoadSwitch.turnOff
 
     }
 
