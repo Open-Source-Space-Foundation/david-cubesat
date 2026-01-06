@@ -79,28 +79,28 @@ module Components {
 
         # --- X+ Coil ---
         param X_PLUS_VOLTAGE: F64 default 3.3 id 9
-        param X_PLUS_RESISTANCE: F64 default 13 id 10
+        param X_PLUS_RESISTANCE: F64 default 57.2 id 10
         param X_PLUS_LENGTH: F64 default 0.053 id 12
         param X_PLUS_WIDTH: F64 default 0.045 id 13
         param X_PLUS_SHAPE: CoilShape default CoilShape.RECTANGULAR id 33
 
         # --- X- Coil ---
         param X_MINUS_VOLTAGE: F64 default 3.3 id 14
-        param X_MINUS_RESISTANCE: F64 default 13 id 15
+        param X_MINUS_RESISTANCE: F64 default 57.2 id 15
         param X_MINUS_LENGTH: F64 default 0.053 id 17
         param X_MINUS_WIDTH: F64 default 0.045 id 18
         param X_MINUS_SHAPE: CoilShape default CoilShape.RECTANGULAR id 34
 
         # --- Y+ Coil ---
         param Y_PLUS_VOLTAGE: F64 default 3.3 id 19
-        param Y_PLUS_RESISTANCE: F64 default 13 id 20
+        param Y_PLUS_RESISTANCE: F64 default 57.2 id 20
         param Y_PLUS_LENGTH: F64 default 0.053 id 22
         param Y_PLUS_WIDTH: F64 default 0.045 id 23
         param Y_PLUS_SHAPE: CoilShape default CoilShape.RECTANGULAR id 35
 
         # --- Y- Coil ---
         param Y_MINUS_VOLTAGE: F64 default 3.3 id 24
-        param Y_MINUS_RESISTANCE: F64 default 13 id 25
+        param Y_MINUS_RESISTANCE: F64 default 57.2 id 25
         param Y_MINUS_LENGTH: F64 default 0.053 id 27
         param Y_MINUS_WIDTH: F64 default 0.045 id 28
         param Y_MINUS_SHAPE: CoilShape default CoilShape.RECTANGULAR id 36
