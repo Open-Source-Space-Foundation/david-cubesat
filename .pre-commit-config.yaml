@@ -5,6 +5,7 @@ repos:
     - id: trailing-whitespace
     - id: end-of-file-fixer
     - id: check-yaml
+      exclude: ^mkdocs\.yml$
     - id: check-json
     - id: check-added-large-files
 
@@ -46,3 +47,13 @@ repos:
         - -vv
         - --color
         - --exclude=Framing/*
+
+- repo: local
+  hooks:
+    - id: docs-sync
+      name: Sync SDD docs to docs-site
+      description: Regenerate docs-site/components from component sdd.md files
+      language: system
+      entry: make docs-sync
+      pass_filenames: false
+      files: (docs/sdd\.md$|^docs-site/components/)
