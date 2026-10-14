@@ -120,7 +120,7 @@ jobs:
 
   integration-uart:
     runs-on:
-      - integration
+      - electra-integration
     needs: build
     timeout-minutes: 30
     steps:
@@ -385,7 +385,7 @@ jobs:
 
   integration-radio:
     runs-on:
-      - integration
+      - electra-integration
     needs:
       - build
     timeout-minutes: 30
