@@ -359,12 +359,12 @@ yamcs-stop: ## Stop all YAMCS-related processes (YAMCS server, events bridge, ad
 	@echo "Done."
 
 # Spacecraft ID(s) passed to the adapter. May be a comma-separated list
-# (e.g. SPACECRAFT_ID=68,67) — the adapter accepts TM from all listed SCIDs
+# (e.g. SPACECRAFT_ID=3,67) — the adapter accepts TM from all listed SCIDs
 # and uses the first for TC framing. Must include the SCID baked into the
 # FSW build (ComCfg.fpp) and registered in the YAMCS instance config.
-# Defaults to the production value (68 / 0x0044). CI sets this to 67 /
+# Defaults to the production value (3 / 0x0003). CI sets this to 67 /
 # 0x0043 via `make-ci-spacecraft-id` to avoid collisions with dev machines.
-SPACECRAFT_ID ?= 68
+SPACECRAFT_ID ?= 3
 
 .PHONY: yamcs
 yamcs: fprime-venv yamcs-dict ## Run YAMCS with serial adapter (Use Case 1: UART_DEVICE=/dev/ttyXXX)
@@ -470,15 +470,14 @@ copy-secrets:
 	@echo "Copied secret files 🤫"
 
 .PHONY: make-ci-spacecraft-id
-make-ci-spacecraft-id: ## Generate a unique spacecraft ID for CI builds (also rewrites YAMCS instance config to match)
-	@echo "Generating unique spacecraft ID for CI build..."
-	sed -i.bak 's/SpacecraftId = 0x0044/SpacecraftId = 0x0043/' PROVESFlightControllerReference/project/config/ComCfg.fpp && \
+make-ci-spacecraft-id: ## Set the CI spacecraft ID (0x0043 / 67) in ComCfg.fpp and the YAMCS instance config, whatever their current values
+	@echo "Setting CI spacecraft ID (0x0043 / 67)..."
+	sed -i.bak -E 's/(SpacecraftId = )0x[0-9A-Fa-f]+/\10x0043/' PROVESFlightControllerReference/project/config/ComCfg.fpp && \
 	rm PROVESFlightControllerReference/project/config/ComCfg.fpp.bak
 	@grep -q 'SpacecraftId = 0x0043' PROVESFlightControllerReference/project/config/ComCfg.fpp || (echo "Failed to set CI spacecraft ID in ComCfg.fpp" && exit 1)
-	@echo "Patching YAMCS instance config spacecraftId 68 -> 67..."
-	sed -i.bak 's/spacecraftId: 68/spacecraftId: 67/g' yamcs/yamcs-data/etc/yamcs.fprime-project.yaml && \
+	sed -i.bak -E 's/(spacecraftId: )[0-9]+/\167/g' yamcs/yamcs-data/etc/yamcs.fprime-project.yaml && \
 	rm yamcs/yamcs-data/etc/yamcs.fprime-project.yaml.bak
-	@! grep -q 'spacecraftId: 68' yamcs/yamcs-data/etc/yamcs.fprime-project.yaml || (echo "Failed to patch all spacecraftId entries in yamcs.fprime-project.yaml" && exit 1)
+	@! grep -E 'spacecraftId: [0-9]+' yamcs/yamcs-data/etc/yamcs.fprime-project.yaml | grep -qv 'spacecraftId: 67' || (echo "Failed to patch all spacecraftId entries in yamcs.fprime-project.yaml" && exit 1)
 
 include makelib/build-tools.mk
 include makelib/ci.mk
