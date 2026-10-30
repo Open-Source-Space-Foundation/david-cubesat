@@ -227,7 +227,7 @@ boards/               # Custom board definitions
 
 bootloader/           # MCUBoot bootloader configuration
 Framing/              # F Prime framing/deframing plugin (pip installable)
-sequences/            # F Prime command sequences (.seq files)
+sequences/            # F Prime command sequences (.seq files), uplinked to /seq/ as *_OTA.bin
 scripts/              # Utility scripts (key generation, etc.)
 tools/                # Development and analysis tools (see tools/README.md)
 docs-site/               # Hand-written MkDocs pages (component SDDs are not here)
@@ -622,14 +622,14 @@ Required for `make gds-integration` (CI mode GDS). Installed into the virtual en
 
 ### Command Sequences (`sequences/`)
 
-Pre-defined F Prime command sequences for operational use. Compile a sequence with:
+Pre-defined F Prime command sequences for operational use. The sequence engine stores them in `/seq/` on the spacecraft. This image uses an `_OTA` suffix so its files sit beside the sequences already on the satellite. Compile a sequence with:
 
 ```bash
-make sequence SEQ=startup        # Compile sequences/startup.seq
-make sequence SEQ=enter_safe     # Compile sequences/enter_safe.seq
+make sequence SEQ=startup_OTA        # Compile sequences/startup_OTA.seq
+make sequence SEQ=enter_safe_OTA     # Compile sequences/enter_safe_OTA.seq
 ```
 
-Available sequences: `startup`, `enter_safe`, `camera_handler_1`, `radio-fast`, `radio_enter_safe`, `your-face`, `not-your-face`.
+Available sequences: `startup_OTA`, `enter_safe_OTA`, `camera_handler_1_OTA`, `radio-fast_OTA`, `radio_enter_safe_OTA`, `your-face_OTA`, `not-your-face_OTA`.
 
 After compiling, upload the sequence through GDS for execution on the board.
 

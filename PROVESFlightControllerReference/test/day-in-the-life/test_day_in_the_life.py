@@ -57,7 +57,7 @@ def test_02_run_radio_sequences(fprime_test_api):
         fprime_test_api: the fprime Test API object
     """
     fprime_test_api.send_command(
-        "ReferenceDeployment.cmdSeq.CS_RUN", ["/seq/radio-fast.bin", "BLOCK"]
+        "ReferenceDeployment.cmdSeq.CS_RUN", ["/seq/radio-fast_OTA.bin", "BLOCK"]
     )
     time.sleep(1)
     if pass_through_serial is not None:
@@ -71,14 +71,14 @@ def test_03_uplink_sequences(fprime_test_api):
     """Test to uplink sequence files
 
     This test will uplink the sequence file binaries that are needed to run the remainder of the day in the life
-    operations. This includes the: radio-fast.bin and camera_manager_1.bin
+    operations. This includes the: radio-fast_OTA.bin and camera_handler_1_OTA.bin
 
     Args:
         fprime_test_api: the fprime Test API object
     """
 
     fprime_test_api.send_command("FileHandling.fileManager.CreateDirectory", ["/seq"])
-    for sequence in ["camera_handler_1.bin"]:
+    for sequence in ["camera_handler_1_OTA.bin"]:
         # Remove sequence and then re-update
         fprime_test_api.send_command(
             "FileHandling.fileManager.RemoveFile", [f"/seq/{sequence}", True]
@@ -97,7 +97,7 @@ def test_04_payload_sequence(fprime_test_api):
         fprime_test_api: the fprime Test API object
     """
     fprime_test_api.send_command(
-        "ReferenceDeployment.payloadSeq.CS_RUN", ["/seq/camera_handler_1.bin", "BLOCK"]
+        "ReferenceDeployment.payloadSeq.CS_RUN", ["/seq/camera_handler_1_OTA.bin", "BLOCK"]
     )
     fprime_test_api.assert_event(
         "ReferenceDeployment.payloadSeq.CS_SequenceComplete", timeout=200

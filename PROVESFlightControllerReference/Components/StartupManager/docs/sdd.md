@@ -25,10 +25,14 @@ Add diagrams here
 
 ## How to Run
 
-1. Choose the startup sequence from the sequences file. To update the .bin file run `make sequence SEQ=startup`
-2. Upload the startup.bin file using uplink. Make sure its set in root in the cube as startup.bin
+1. Choose the startup sequence from the sequences directory. To update the .bin file run `make sequence SEQ=startup_OTA`
+2. Upload startup_OTA.bin using uplink to `/seq/startup_OTA.bin`. The sequence engine stores every sequence in `/seq/`.
 3. Restart the cube, it should do the startup sequence right away
-4. To disable the startup sequence delete the sequence file. Use FileHandling.filemanager.RemoveFile to remove the startup.bin file
+4. To disable the startup sequence delete the sequence file. Use FileHandling.filemanager.RemoveFile to remove `/seq/startup_OTA.bin`
+
+### Why this Electra branch uses `startup_OTA.bin`
+
+Second-slot OTA image. Sequences share `/seq/`, so this image uses `startup_OTA.bin` beside the other image's `startup.bin`.
 
 The StartupManager maintains internal state tracking its lifecycle:
 
@@ -96,7 +100,7 @@ The boot count lives in `BOOT_COUNT_FILE` on the flight filesystem (FAT — ELM 
 | `ARMED` | `bool` | `true` | When true, system waits for quiescence period. When false, quiescence is bypassed |
 | `QUIESCENCE_TIME` | `Fw.TimeIntervalValue` | `{seconds = 45 * 60, useconds = 0}` | Duration to wait for quiescence (45 minutes by default) |
 | `QUIESCENCE_START_FILE` | `string` | `"/quiescence_start.bin"` | File path for storing the mission-wide quiescence start time |
-| `STARTUP_SEQUENCE_FILE` | `string` | `"/startup.bin"` | Path to the command sequence file to run at startup |
+| `STARTUP_SEQUENCE_FILE` | `string` | `"/seq/startup_OTA.bin"` | Startup sequence. `_OTA` so this Electra image can share `/seq/`. |
 | `BOOT_COUNT_FILE` | `string` | `"/boot_count.bin"` | File path for storing the boot count |
 | `TRANSMIT_ENABLE_TICKS` | `U32` | `2800` | 1 Hz run ticks before enabling LoRa transmit (45×60 + 100 s margin) |
 

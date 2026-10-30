@@ -149,7 +149,7 @@ def run_startup_sequence(api: IntegrationTestAPI):
     time.sleep(0.5)
 
     print("Running startup sequence (NO_BLOCK)...")
-    send_command(api, f"{CMD_SEQ}.CS_RUN", ["/seq/startup.bin", "NO_BLOCK"])
+    send_command(api, f"{CMD_SEQ}.CS_RUN", ["/seq/startup_OTA.bin", "NO_BLOCK"])
 
     print("\n[INFO] Sequence started. Use option 11 to cancel when done.")
 
@@ -160,16 +160,16 @@ def run_three_sequencers(api: IntegrationTestAPI):
     send_command(api, f"{STARTUP_MANAGER}.ARMED_PRM_SET", ["FALSE"])
     time.sleep(0.5)
 
-    print("\nStarting cmdSeq with startup.seq...")
-    send_command(api, f"{CMD_SEQ}.CS_RUN", ["/seq/startup.bin", "NO_BLOCK"])
+    print("\nStarting cmdSeq with startup_OTA.seq...")
+    send_command(api, f"{CMD_SEQ}.CS_RUN", ["/seq/startup_OTA.bin", "NO_BLOCK"])
 
-    print("Starting payloadSeq with camera_handler_1.seq...")
+    print("Starting payloadSeq with camera_handler_1_OTA.seq...")
     send_command(
-        api, f"{PAYLOAD_SEQ}.CS_RUN", ["/seq/camera_handler_1.bin", "NO_BLOCK"]
+        api, f"{PAYLOAD_SEQ}.CS_RUN", ["/seq/camera_handler_1_OTA.bin", "NO_BLOCK"]
     )
 
-    print("Starting safeModeSeq with radio-fast.seq...")
-    send_command(api, f"{SAFE_MODE_SEQ}.CS_RUN", ["/seq/radio-fast.bin", "NO_BLOCK"])
+    print("Starting safeModeSeq with radio-fast_OTA.seq...")
+    send_command(api, f"{SAFE_MODE_SEQ}.CS_RUN", ["/seq/radio-fast_OTA.bin", "NO_BLOCK"])
 
     print("\n[DONE] All 3 sequencers running concurrently.")
     print("Use option 11 to cancel all sequences.")
