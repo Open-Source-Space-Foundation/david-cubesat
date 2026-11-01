@@ -97,7 +97,8 @@ def test_04_payload_sequence(fprime_test_api):
         fprime_test_api: the fprime Test API object
     """
     fprime_test_api.send_command(
-        "ReferenceDeployment.payloadSeq.CS_RUN", ["/seq/camera_handler_1_OTA.bin", "BLOCK"]
+        "ReferenceDeployment.payloadSeq.CS_RUN",
+        ["/seq/camera_handler_1_OTA.bin", "BLOCK"],
     )
     fprime_test_api.assert_event(
         "ReferenceDeployment.payloadSeq.CS_SequenceComplete", timeout=200

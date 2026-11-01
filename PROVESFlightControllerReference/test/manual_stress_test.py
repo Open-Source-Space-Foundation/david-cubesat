@@ -169,7 +169,9 @@ def run_three_sequencers(api: IntegrationTestAPI):
     )
 
     print("Starting safeModeSeq with radio-fast_OTA.seq...")
-    send_command(api, f"{SAFE_MODE_SEQ}.CS_RUN", ["/seq/radio-fast_OTA.bin", "NO_BLOCK"])
+    send_command(
+        api, f"{SAFE_MODE_SEQ}.CS_RUN", ["/seq/radio-fast_OTA.bin", "NO_BLOCK"]
+    )
 
     print("\n[DONE] All 3 sequencers running concurrently.")
     print("Use option 11 to cancel all sequences.")
