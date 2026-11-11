@@ -1,8 +1,9 @@
 name: ota-unlabel
 
-# The `test-ota` label authorises ota.yaml to run one commit on the hardware
-# runners. When the PR head moves, that authorisation no longer covers the new
-# code, so drop the label; a maintainer re-labels after reviewing the push.
+# The `test-ota` and `test-ota-upgrade` labels authorise ota.yaml and
+# ota-upgrade.yaml to run one commit on the hardware runners. When the PR head
+# moves, that authorisation no longer covers the new code, so drop the labels;
+# a maintainer re-labels after reviewing the push.
 # Runs on GitHub-hosted runners and checks out nothing: it only calls the API.
 on:
   pull_request:
@@ -14,13 +15,20 @@ permissions:
 
 jobs:
   remove-label:
-    if: contains(github.event.pull_request.labels.*.name, 'test-ota')
+    if: >-
+      contains(github.event.pull_request.labels.*.name, 'test-ota') ||
+      contains(github.event.pull_request.labels.*.name, 'test-ota-upgrade')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Remove test-ota label
+      - name: Remove OTA labels
         env:
           GH_TOKEN: ${{ github.token }}
           PR: ${{ github.event.pull_request.number }}
+          LABELS: ${{ join(github.event.pull_request.labels.*.name, ' ') }}
         run: |
-          gh pr edit "$PR" --repo "$GITHUB_REPOSITORY" --remove-label test-ota
+          for label in test-ota test-ota-upgrade; do
+            if [[ " $LABELS " == *" $label "* ]]; then
+              gh pr edit "$PR" --repo "$GITHUB_REPOSITORY" --remove-label "$label"
+            fi
+          done

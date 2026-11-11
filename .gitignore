@@ -5,6 +5,7 @@ build-artifacts/
 build-gtest/
 build-fprime-*
 build-ota-test/
+/ota-from/
 *-template
 *.template.cpp
 *.template.hpp
