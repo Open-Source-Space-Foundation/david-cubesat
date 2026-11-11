@@ -1,0 +1,311 @@
+name: ota-upgrade
+
+# Upgrade a board from the latest release to this commit over the air, the way
+# a satellite in orbit would be upgraded. ota.yaml tests OTA between two builds
+# of the same commit; this tests that the flight software already in the field
+# can install the new one: the release's ground stack, Updater, FlashWorker and
+# MCUBoot stage the new image, and the new image confirms itself.
+#
+# Steps on the bare-FCB board (see ota_upgrade_test.py for the phases):
+#   1. flash the release (built from its tag; releases carry no binaries);
+#   2. release ground: uplink this commit's image, arm a TEST boot, reboot;
+#   3. this ground:    the new image booted; reboot unconfirmed;
+#   4. release ground: MCUBoot reverted to the release; re-arm, reboot;
+#   5. this ground:    confirm; the new image survives a reboot.
+#
+# It holds the board for ~45 min, so it runs, like ota.yaml:
+#   - on every push to main;
+#   - on a PR when a maintainer adds the `test-ota-upgrade` label, pinned to
+#     the labeled commit; ota-unlabel.yaml drops the label when the head moves;
+#   - on demand from the Actions tab, optionally from a chosen release tag.
+# It is not a required check, so it never blocks a merge.
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - labeled
+  workflow_dispatch:
+    inputs:
+      from-tag:
+        description: Release tag to upgrade from (default the latest release)
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  resolve-release:
+    if: github.event_name != 'pull_request' || github.event.label.name == 'test-ota-upgrade'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      tag: ${{ steps.release.outputs.tag }}
+    steps:
+      - name: Resolve release tag
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FROM_TAG: ${{ inputs.from-tag }}
+        run: |
+          if [ -n "$FROM_TAG" ]; then
+            tag=$FROM_TAG
+          else
+            # The latest published release; drafts and pre-releases are skipped.
+            tag=$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)
+          fi
+          if ! [[ "$tag" =~ ^[A-Za-z0-9._-]+$ ]]; then
+            echo "::error::not a release tag name: $tag"
+            exit 1
+          fi
+          gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" --jq .ref
+          echo "Upgrading from $tag"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+  # Built with the release's own Makefile from a checkout of its tag: the
+  # release predates this branch's composite actions and make targets.
+  build-release:
+    runs-on: deathstar
+    needs:
+      - resolve-release
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: refs/tags/${{ needs.resolve-release.outputs.tag }}
+
+      - name: Set up toolchain
+        run: |
+          make download-bin
+          make submodules
+          make fprime-venv
+          make zephyr-workspace
+          make zephyr-sdk
+          make zephyr-export
+          make zephyr-python-deps
+
+      - name: Set Authentication Key
+        id: auth-key
+        env:
+          AUTH_KEY: ${{ secrets.AUTH_KEY }}
+        run: |
+          header=$(sed -n 's/^AUTH_DEFAULT_KEY_HEADER ?= *//p' Makefile)
+          if [ -z "$header" ]; then
+            echo "::error::no AUTH_DEFAULT_KEY_HEADER in the release's Makefile"
+            exit 1
+          fi
+          echo "header=$header" >> "$GITHUB_OUTPUT"
+          # Written before generate so its generate-auth-key step keeps it.
+          echo "#define AUTH_DEFAULT_KEY \"$AUTH_KEY\"" > "$header"
+
+      - name: Build MCUBoot and Flight Software
+        run: |
+          # The MCUBoot test key, as both the release's CI and this branch's
+          # Makefile use, so the release's MCUBoot accepts this branch's image.
+          mkdir -p keys
+          cp lib/zephyr-workspace/bootloader/mcuboot/root-rsa-2048.pem keys/proves.pem
+          make generate
+          make build-mcuboot
+          make build
+
+      - name: Collect flash images
+        run: |
+          # Named as .github/actions/flash-firmware expects.
+          cp build/mcuboot/zephyr/zephyr.elf mcuboot.elf
+          cp build-artifacts/zephyr.signed.hex bootable.signed.hex
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ota-from-artifacts
+          path: |
+            mcuboot.elf
+            bootable.signed.hex
+            build-artifacts/zephyr/fprime-zephyr-deployment
+          retention-days: 7
+
+      # Self-hosted runners keep the workspace between runs.
+      - name: Remove authentication key
+        if: always() && steps.auth-key.outputs.header != ''
+        env:
+          HEADER: ${{ steps.auth-key.outputs.header }}
+        run: |
+          rm -f "$HEADER"
+
+  build-target:
+    if: github.event_name != 'pull_request' || github.event.label.name == 'test-ota-upgrade'
+    runs-on: deathstar
+    outputs:
+      ota-build-id: ${{ steps.ota-build-id.outputs.id }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          # Pin to the labeled head SHA, not the merge ref. Empty off-PR events.
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Build Firmware
+        uses: ./.github/actions/build-firmware
+        with:
+          auth-key: ${{ secrets.AUTH_KEY }}
+          # The OTA board's ID, as in ota.yaml.
+          ci-spacecraft-id-value: "69"
+
+      - name: Upload target dictionary
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ota-target-artifacts
+          path: |
+            build-artifacts/zephyr/fprime-zephyr-deployment
+          retention-days: 7
+
+      # Overwrites the build outputs, so keep after the dictionary upload.
+      - name: Derive OTA build ID
+        id: ota-build-id
+        run: |
+          echo "id=${GITHUB_SHA::8}-${{ github.run_id }}" >> "$GITHUB_OUTPUT"
+
+      - name: Build OTA Test Image
+        run: |
+          make ota-test-image OTA_BUILD_ID="${{ steps.ota-build-id.outputs.id }}"
+
+      - name: Upload OTA test image
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ota-target-image
+          path: |
+            build-ota-test/ota-test-image.signed.bin
+          retention-days: 7
+
+      - name: Remove authentication key
+        if: always()
+        uses: ./.github/actions/remove-auth-key
+
+  # Same bare-FCB board as ota.yaml; the concurrency group serializes the two.
+  integration-ota-upgrade-fcb:
+    runs-on:
+      - integration-fcb
+    needs:
+      - resolve-release
+      - build-release
+      - build-target
+    concurrency:
+      group: integration-fcb-board
+      cancel-in-progress: false
+    timeout-minutes: 120
+    env:
+      OTA_IMAGE: ${{ github.workspace }}/ota-image/ota-test-image.signed.bin
+      OTA_BUILD_ID: ${{ needs.build-target.outputs.ota-build-id }}
+      OTA_STATE: ${{ github.workspace }}/ota-image/ota-upgrade-state.json
+      OTA_DEST: /otaupg.bin
+      # Cooldown 0.6 makes the uplink ~35 min; faster rates corrupt it until #457 is fixed.
+      OTA_PYTEST_ARGS: --file-uplink-cooldown 0.6 --file-uplink-chunk-size 204
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      # The release's ground stack (GDS plugin, dictionary) for phases 1 and 3.
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: refs/tags/${{ needs.resolve-release.outputs.tag }}
+          path: ota-from
+
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
+        with:
+          name: ota-target-artifacts
+          path: .
+
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
+        with:
+          name: ota-target-image
+          path: ota-image
+
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
+        with:
+          name: ota-from-artifacts
+          path: ota-from
+
+      - name: Integration Setup (target ground)
+        uses: ./.github/actions/integration-setup
+        with:
+          auth-key: ${{ secrets.AUTH_KEY }}
+          ci-spacecraft-id-value: "69"
+
+      - name: Integration Setup (release ground)
+        id: release-ground
+        working-directory: ota-from
+        env:
+          AUTH_KEY: ${{ secrets.AUTH_KEY }}
+        run: |
+          if [ -z "$AUTH_KEY" ]; then
+            echo "::error::auth-key is empty; secrets.AUTH_KEY is unavailable (fork PR?)"
+            exit 1
+          fi
+          header=$(sed -n 's/^AUTH_DEFAULT_KEY_HEADER ?= *//p' Makefile)
+          if [ -z "$header" ]; then
+            echo "::error::no AUTH_DEFAULT_KEY_HEADER in the release's Makefile"
+            exit 1
+          fi
+          echo "header=ota-from/$header" >> "$GITHUB_OUTPUT"
+          # The release's framer plugin reads the key from this header.
+          echo "#define AUTH_DEFAULT_KEY \"$AUTH_KEY\"" > "$header"
+          export VIRTUAL_ENV="$PWD/fprime-venv"
+          make submodules fprime-venv framer-plugin
+
+      - name: Stage release flash images
+        run: |
+          # flash-firmware reads them from the workspace root.
+          cp ota-from/mcuboot.elf ota-from/bootable.signed.hex .
+
+      - name: Flash release firmware (SWD)
+        uses: ./.github/actions/flash-firmware
+        with:
+          power-cycle: "false"
+          probe-serial: ${{ env.FCB_PROBE_SERIAL }}
+
+      - name: "Phase 1 (release ground): stage the new image"
+        run: ./tools/ci/ota-upgrade-phase.sh release test_release_stages_target
+
+      - name: "Phase 2 (target ground): new image boots"
+        run: ./tools/ci/ota-upgrade-phase.sh target test_target_boots_unconfirmed
+
+      - name: "Phase 3 (release ground): unconfirmed image reverts"
+        run: ./tools/ci/ota-upgrade-phase.sh release test_release_after_revert
+
+      - name: "Phase 4 (target ground): confirm the new image"
+        run: ./tools/ci/ota-upgrade-phase.sh target test_target_confirms
+
+      - name: Stop GDS
+        if: always()
+        run: ./tools/ci/ota-upgrade-phase.sh stop
+
+      - name: Upload GDS logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: gds-log-ota-upgrade-fcb
+          path: |
+            gds-*.log
+            logs
+            ota-from/logs
+            !**/*.xlsx
+          if-no-files-found: ignore
+          retention-days: 7
+
+      # A passing run confirms the new image, which only a reflash can undo.
+      - name: Restore release firmware
+        if: always()
+        uses: ./.github/actions/flash-firmware
+        with:
+          power-cycle: "false"
+          probe-serial: ${{ env.FCB_PROBE_SERIAL }}
+
+      # Self-hosted runners keep the workspace between runs.
+      - name: Remove authentication keys
+        if: always()
+        env:
+          RELEASE_HEADER: ${{ steps.release-ground.outputs.header }}
+        run: |
+          rm -f PROVESFlightControllerReference/Components/TcSecurityDeframer/AuthDefaultKey.h
+          if [ -n "$RELEASE_HEADER" ]; then rm -f "$RELEASE_HEADER"; fi
