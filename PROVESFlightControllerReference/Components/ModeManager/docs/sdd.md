@@ -99,11 +99,11 @@ Voltage thresholds and command loss timeout are configurable via F-Prime paramet
 | SafeModeRecoveryVoltage | F32 | 8.0 | Voltage (V) above which safe mode can be exited |
 | SafeModeDebounceSeconds | U32 | 10 | Consecutive seconds required for transitions |
 | COMM_LOSS_TIME | Fw.TimeIntervalValue | {seconds=3*60*60*24} | Time without an authenticated packet before command loss safe mode entry (default: 3 days) |
-| SAFEMODE_SEQUENCE_FILE | string | `/seq/enter_safe_OTA.bin` | Safe-mode sequence. `_OTA` so this Electra image can share `/seq/`. |
+| SAFEMODE_SEQUENCE_FILE | string | `/seq/radio_enter_safe_OTA.bin` | Safe-mode sequence. `_OTA` so this Electra image can share `/seq/`. |
 
 Parameters can be modified at runtime via `PRM_SET` commands.
 
-Second-slot OTA image. Sequences share `/seq/`, so this image uses `enter_safe_OTA.bin` beside the other image's `enter_safe.bin`.
+Second-slot OTA image. Sequences share `/seq/`, so this image uses `radio_enter_safe_OTA.bin` beside the other image's `radio_enter_safe.bin`.
 
 ## Events
 

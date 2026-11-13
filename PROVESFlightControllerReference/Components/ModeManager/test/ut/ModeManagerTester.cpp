@@ -13,7 +13,7 @@
 namespace Components {
 
 // Default value of the SAFEMODE_SEQUENCE_FILE parameter (see ModeManager.fpp)
-static const char* const SAFE_MODE_SEQUENCE_FILE = "/seq/enter_safe_OTA.bin";
+static const char* const SAFE_MODE_SEQUENCE_FILE = "/seq/radio_enter_safe_OTA.bin";
 
 // ----------------------------------------------------------------------
 // Construction and destruction
