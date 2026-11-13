@@ -352,6 +352,7 @@ jobs:
       - uses: ./.github/actions/remove-auth-key
         if: always()
 
+  # Drop the `integration-radio` label from a runner to take its bench out of radio tests.
   integration-radio:
     needs: [changes, build]
     if: ${{ !cancelled() && needs.build.result == 'success' && needs.changes.outputs.docs-only != 'true' }}
