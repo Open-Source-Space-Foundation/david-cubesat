@@ -99,7 +99,7 @@ Voltage thresholds and command loss timeout are configurable via F-Prime paramet
 | SafeModeRecoveryVoltage | F32 | 8.0 | Voltage (V) above which safe mode can be exited |
 | SafeModeDebounceSeconds | U32 | 10 | Consecutive seconds required for transitions |
 | COMM_LOSS_TIME | Fw.TimeIntervalValue | {seconds=3*60*60*24} | Time without an authenticated packet before command loss safe mode entry (default: 3 days) |
-| SAFEMODE_SEQUENCE_FILE | string | `/seq/radio_enter_safe_OTA.bin` | Safe-mode sequence. `_OTA` so this Electra image can share `/seq/`. |
+| SAFEMODE_SEQUENCE_FILE | string | `/seq/radio_enter_safe_OTA.bin` | Safe-mode radio sequence. `_OTA` so this Electra image can share `/seq/`. |
 
 Parameters can be modified at runtime via `PRM_SET` commands.
 
@@ -136,8 +136,6 @@ State is persisted to `/mode_state.bin`:
 - Safe mode entry count (U32)
 - Safe mode reason (U8)
 - Clean shutdown flag (U8)
-
-On load, a file whose mode is not a valid `SystemMode` or whose reason is not a valid `SafeModeReason` (e.g. a torn write) is treated as corrupt: `StatePersistenceFailure` is emitted with `"load-corrupt"` and the mode byte, or `"load-corrupt-reason"` and the reason byte, and defaults (NORMAL, count 0, reason NONE) are used instead of asserting.
 
 ## Safe Mode Reason Logic
 
