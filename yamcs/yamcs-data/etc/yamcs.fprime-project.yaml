@@ -25,7 +25,7 @@ dataLinks:
     class: org.yamcs.tctm.ccsds.UdpTmFrameLink
     port: 50000
     frameType: "TM"
-    spacecraftId: 68        # ComCfg.fpp: SpacecraftId = 0x0044
+    spacecraftId: 3         # ComCfg.fpp: SpacecraftId = 0x0003
     frameLength: 248        # ComCfg.fpp: TmFrameFixedSize = 248
     errorDetection: CRC16
     virtualChannels:
@@ -42,7 +42,7 @@ dataLinks:
     class: org.yamcs.tctm.ccsds.UdpTcFrameLink
     host: localhost
     port: 50001
-    spacecraftId: 68
+    spacecraftId: 3
     maxFrameLength: 248
     errorDetection: CRC16
     virtualChannels:

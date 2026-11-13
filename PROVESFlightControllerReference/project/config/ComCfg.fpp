@@ -9,7 +9,7 @@ constant SIZE_OF_FwPacketDescriptorType = 2  @< Size of FwPacketDescriptorType i
 module ComCfg {
 
     @ Spacecraft ID (10 bits) for CCSDS Data Link layer
-    dictionary constant SpacecraftId = 0x0044
+    dictionary constant SpacecraftId = 0x0003
 
     @ Fixed size of CCSDS TM frames
     @ Capped at 248 bytes: the radio module has a 4 byte header and the Zephyr radio driver adds
