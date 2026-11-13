@@ -122,21 +122,22 @@ void StartupManager ::startupsequenceStarted_handler(FwIndexType portNum,
                                                      const Fw::StringBase& fileName,
                                                      const Svc::SeqArgs& args) {
     (void)portNum;
-    this->onSequenceStarted(fileName);
+    this->m_sequence_file = fileName;
+    this->onSequenceStarted();
 }
 
 void StartupManager ::safeModeSequenceStarted_handler(FwIndexType portNum,
                                                       const Fw::StringBase& fileName,
                                                       const Svc::SeqArgs& args) {
     (void)portNum;
-    this->onSequenceStarted(fileName);
+    this->onSequenceStarted();
 }
 
 void StartupManager ::payloadSequenceStarted_handler(FwIndexType portNum,
                                                      const Fw::StringBase& fileName,
                                                      const Svc::SeqArgs& args) {
     (void)portNum;
-    this->onSequenceStarted(fileName);
+    this->onSequenceStarted();
 }
 
 void StartupManager ::startupCompleteSequence_handler(FwIndexType portNum,
@@ -147,9 +148,8 @@ void StartupManager ::startupCompleteSequence_handler(FwIndexType portNum,
     (void)opCode;
     (void)cmdSeq;
 
-    // Emits a log event indicating the completion of the start-up sequence, and whether it was successful or not
-    // based on the information in m_sequence_file and the command response.
-    if (this->m_sequence_file == "//seq/startup_OTA.bin") {
+    Fw::ParamValid is_valid;
+    if (this->m_sequence_file == this->paramGet_STARTUP_SEQUENCE_FILE(is_valid)) {
         if (response == Fw::CmdResponse::OK) {
             this->log_ACTIVITY_LO_StartupSequenceFinished();
         } else {
@@ -188,8 +188,7 @@ void StartupManager ::loraFirstStart_handler(FwIndexType portNum) {
     this->m_pending_hardcoded_enable = false;
 }
 
-void StartupManager ::onSequenceStarted(const Fw::StringBase& fileName) {
-    this->m_sequence_file = fileName;
+void StartupManager ::onSequenceStarted() {
     this->m_active_sequences++;
 }
 

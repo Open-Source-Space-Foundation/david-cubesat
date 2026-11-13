@@ -121,7 +121,7 @@ class StartupManager final : public StartupManagerComponentBase {
     // ----------------------------------------------------------------------
 
     //! Record that a sequence has started on any sequencer
-    void onSequenceStarted(const Fw::StringBase& fileName);
+    void onSequenceStarted();
 
     //! Record that a sequence has completed on any sequencer
     void onSequenceCompleted();
@@ -133,7 +133,7 @@ class StartupManager final : public StartupManagerComponentBase {
     FwSizeType m_boot_count = 0;              //!< Current boot count (0 = first run tick not yet processed)
     bool m_boot_count_persisted = false;      //!< Whether the incremented boot count has reached the file
     bool m_boot_count_write_logged = false;   //!< Warning already emitted for the current persist-failure streak
-    Fw::String m_sequence_file;               //!< The filepath for the sequence last initiated
+    Fw::String m_sequence_file;               //!< The filepath of the sequence cmdSeq last started
     U32 m_transmit_enable_ticks = 0;          //!< Remaining 1 Hz ticks until hard-coded transmit enable
     U32 m_active_sequences = 0;               //!< Count of sequences currently running across sequencers
     bool m_pending_hardcoded_enable = false;  //!< Hardcoded enable deferred until sequences finish
