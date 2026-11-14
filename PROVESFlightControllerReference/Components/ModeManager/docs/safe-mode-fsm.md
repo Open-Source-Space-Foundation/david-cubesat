@@ -72,7 +72,7 @@ The ModeManager can enter SAFE_MODE from NORMAL mode through multiple triggers, 
 
 #### Entry Actions
 When entering SAFE_MODE, the ModeManager:
-1. Executes the safe mode radio sequence (`/seq/enter_safe.bin`)
+1. Executes the safe mode radio sequence (`/seq/radio_enter_safe_OTA.bin`). Electra second-slot image; `_OTA` because `/seq/` is shared.
 2. Sets `m_mode = SAFE_MODE`
 3. Increments `m_safeModeEntryCount` (persisted)
 4. Sets `m_safeModeReason` to the trigger reason

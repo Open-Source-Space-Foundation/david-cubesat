@@ -220,7 +220,7 @@ void StartupManager ::startupCompleteSequence_handler(FwIndexType portNum,
 
     // Emits a log event indicating the completion of the start-up sequence, and whether it was successful or not
     // based on the information in m_sequence_file and the command response.
-    if (this->m_sequence_file == "//seq/startup.bin") {
+    if (this->m_sequence_file == "//seq/startup_OTA.bin") {
         if (response == Fw::CmdResponse::OK) {
             this->log_ACTIVITY_LO_StartupSequenceFinished();
         } else {

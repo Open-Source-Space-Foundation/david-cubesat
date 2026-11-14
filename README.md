@@ -232,7 +232,7 @@ Depending on the comdelay, the gds should turn green every time a packet is sent
 
 ## Sequences
 
-You can control the specific command lists of the satellite by writing a sequence file. Sequence files are contained in /sequences. For details on how to attack the startup sequence check the sdd in Startup Manager.
+You can control the specific command lists of the satellite by writing a sequence file. Sequence files are contained in /sequences and are uplinked to `/seq/` on the spacecraft. This image uses the `_OTA` names (`/seq/startup_OTA.bin`, `/seq/enter_safe_OTA.bin`) so they sit beside the sequences already on the satellite. For details on how to attack the startup sequence check the sdd in Startup Manager.
 
 ## Conducting Over the Air Updates
 

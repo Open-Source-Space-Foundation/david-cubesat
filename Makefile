@@ -405,9 +405,9 @@ GDS_COMMAND ?= $(UV_RUN) fprime-gds
 ARTIFACT_DIR ?= $(shell pwd)/build-artifacts
 
 .PHONY: sequence
-sequence: fprime-venv ## Compile a sequence file (usage: make sequence SEQ=startup)
+sequence: fprime-venv ## Compile a sequence file (usage: make sequence SEQ=startup_OTA)
 	@if [ -z "$(SEQ)" ]; then \
-		echo "Error: SEQ variable not set. Usage: make sequence SEQ=startup"; \
+		echo "Error: SEQ variable not set. Usage: make sequence SEQ=startup_OTA"; \
 		exit 1; \
 	fi
 	@echo "Compiling sequence: $(SEQ).seq"

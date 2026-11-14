@@ -216,7 +216,7 @@ module Components {
         @ Debounce time for voltage transitions (seconds)
         param SafeModeDebounceSeconds: U32 default 10
 
-        param SAFEMODE_SEQUENCE_FILE: string default "/seq/enter_safe.bin"
+        param SAFEMODE_SEQUENCE_FILE: string default "/seq/radio_enter_safe_OTA.bin"
 
         @ Time (in seconds) without an authenticated packet before triggering command loss safe mode
         @ Default: 3 days = 3*60*60*24
