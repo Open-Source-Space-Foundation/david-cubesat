@@ -25,7 +25,10 @@ module Drv {
         event DeviceNotReady() severity warning low format "Device not ready" throttle 5
 
         @ Event for reporting initialization failure
-        event DeviceInitFailed(ret: I32) severity warning low format "Initialization failed with return code: {}" throttle 5
+        @ Throttled to 1: an absent or dead sensor fails every init retry (1 Hz), and the identical repeats
+        @ fill the 50-deep LoRa event queue before TRANSMIT is enabled, dropping newer events such as command
+        @ acks. ThrottleClear on a successful init re-arms the event.
+        event DeviceInitFailed(ret: I32) severity warning low format "Initialization failed with return code: {}" throttle 1
 
         @ Event for reporting nil device error
         event DeviceNil() severity warning low format "Device is nil" throttle 5
