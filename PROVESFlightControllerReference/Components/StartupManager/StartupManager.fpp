@@ -65,7 +65,7 @@ module Components {
             format "Hardcoded Startup Sequence has enabled the radio"
 
         @ Path to the start-up sequence file
-        param STARTUP_SEQUENCE_FILE: string default "/seq/startup_OTA.bin"
+        param STARTUP_SEQUENCE_FILE: string default "/seq/startup_OTA.bin" id 3 set opcode 0x8 save opcode 0x9
 
         @ File to store the boot count
         param BOOT_COUNT_FILE: string default "/boot_count.bin" id 4 set opcode 0xa save opcode 0xb
