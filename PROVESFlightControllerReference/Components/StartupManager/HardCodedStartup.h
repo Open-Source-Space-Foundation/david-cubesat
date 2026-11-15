@@ -6,6 +6,6 @@
 // The satellite should be built for testing with HardCodedStartup disabled, so that the radio won't turn on
 // accidentally during testing For the flight build, HardCodedStartup should be enabled so that the radio will turn on
 // automatically after booting
-#define DEFAULT_STARTUP_VALUE 0
+#define DEFAULT_STARTUP_VALUE 1
 
 #endif  // HARD_CODED_STARTUP_H
